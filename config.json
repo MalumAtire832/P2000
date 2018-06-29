@@ -1,0 +1,12 @@
+{
+  "rtlsdr": {
+    "blacklist": {
+      "messages": [
+        "ALN TESTOPROEP BACK-UP SYSTEEM GMC BN (2)",
+        "ALN TESTOPROEP HOOFDSSYSTEEM PGW BN (1)"
+      ],
+      "monitorcodes": []
+    }
+  },
+  "multimon": {}
+}
