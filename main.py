@@ -4,7 +4,11 @@ import rtlsdr
 class MyReader(rtlsdr.AbstractReader):
 
     def act(self, raw):
-        print(str(self.create_line(raw)))
+        line = self.create_line(raw)
+        if self.is_line_blacklisted(line):
+            print("== LINE IS BLACKLISTED ==")
+        else:
+            print(str(line))
 
 
 connection = rtlsdr.Connection()

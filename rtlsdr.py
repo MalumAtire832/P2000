@@ -7,7 +7,7 @@ from sys import exc_info
 class Line:
 
     def __init__(self, line, **kwargs):
-        r"""
+        """
         Create a new FLEX Line object with data from the given line.
         :param line: The line to extract the data from.
         :keyword timestamp: The timestamp to set to the object.
@@ -183,7 +183,10 @@ class AbstractReader:
         :param line: The line to check against the blacklist.
         :return: True if the line is blacklisted.
         """
-        return Line(line).monitorcode in self.blacklist_monitorcodes
+        if isinstance(line, Line):
+            return line.monitorcode in self.blacklist_monitorcodes
+        else:
+            return self.create_line(line).monitorcode in self.blacklist_monitorcodes
 
     def is_message_blacklisted(self, line):
         """
@@ -193,7 +196,10 @@ class AbstractReader:
         :param line: The line to check against the blacklist.
         :return: True if the line is blacklisted.
         """
-        return Line(line).message in self.blacklist_messages
+        if isinstance(line, Line):
+            return line.message in self.blacklist_messages
+        else:
+            return self.create_line(line).message in self.blacklist_messages
 
     # noinspection PyMethodMayBeStatic
     def load_config(self):
