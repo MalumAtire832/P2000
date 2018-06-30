@@ -1,7 +1,7 @@
 import rtlsdr
 
 
-class MyReader(rtlsdr.Reader):
+class MyReader(rtlsdr.AbstractReader):
 
     def act(self, raw):
         print(str(self.create_line(raw)))

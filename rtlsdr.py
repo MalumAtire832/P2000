@@ -69,7 +69,17 @@ class Connection:
         run(self.COMMAND_KILL)
 
 
-class Reader:
+class AbstractReader:
+    """
+    This class is a partially abstract implementation of a class that Reads from a Connection.
+    A Reader can act on a line received by any Connection that is attached to the Reader.
+    The user should extend this class and create his/her own implementation of the act(line) method.
+
+    :ivar blacklist_messages: An array of messages contained in config.json -> rtlsdr -> blacklist -> messages.
+    :ivar blacklist_monitorcodes: An array of monitorcodes contained in config.json -> rtlsdr -> blacklist -> monitorcodes.
+    :ivar encoding: The encoding for the received lines, default is UTF-8.
+    :ivar connection: The connection to act on, set and unset with attach and detach respectively.
+    """
 
     def __init__(self, **kwargs):
         self.blacklist_messages = self.load_config()["rtlsdr"]["blacklist"]["messages"]
@@ -77,18 +87,19 @@ class Reader:
         self.encoding = kwargs.get("encoding", "utf-8")
         self.connection = None
 
-    def attach(self, connection, kill=True):
+    def attach(self, connection):
         """
         Attach the given connection to the reader, calls the setup method and sets the instance variables.
+
         :param connection: The connection to attach.
-        :param kill: To kill or not kill any current running processes, default is True.
         :return: Nothing
+
         :raises ConnectionError: Raised when a connection is already active or existent.
         """
         if self.connection is None:
-            self.__setup_connection__(connection, kill)
+            self.__setup_connection__(connection)
         elif self.connection.stdout is None:
-            self.__setup_connection__(connection, kill)
+            self.__setup_connection__(connection)
         else:
             raise ConnectionError("Connection is already active.").with_traceback(exc_info()[2])
 
@@ -96,22 +107,26 @@ class Reader:
         """
         Detach the current connection from the reader.
         Kills the connection and sets self.connection to None.
+
         :return: Nothing.
         """
         if self.connection is not None:
             self.connection.kill()
             self.connection = None
 
-    def __setup_connection__(self, connection, kill):
+    def __setup_connection__(self, connection):
         """
         Set the connection to the instance and open it.
+        As soon as the connection is opened a loop is started on stdout of the connection.
+        Each line that is received wil be acted upon with the act(line) method.
+        The connection is always detached in case of error or a finished process.
+
         :param connection: The connection to set up.
-        :param kill: To kill or not kill any current running processes.
         :return: Nothing
         """
         try:
             self.connection = connection
-            connection.open(kill=kill)
+            connection.open()
             for line in self.connection.stdout:
                 self.act(line)
         finally:
@@ -121,6 +136,7 @@ class Reader:
     def act(self, line):
         """
         Act on the given line.
+
         :param line: The line to operate on.
         :return: Up to the user.
         """
@@ -128,6 +144,7 @@ class Reader:
     def decode_line(self, line, strip=True):
         """
         Decode the line from a byte-format to the format determined by self.encoding, default is "utf-8".
+
         :param line: The line to decode.
         :param strip: If the newlines should be striped from the line or not, default is True.
         :return: The decoded line in the given format.
@@ -135,15 +152,24 @@ class Reader:
         decoded = line.decode(self.encoding)
         return decoded.rstrip() if strip else decoded
 
-    def create_line(self, line, decode=True, strip=True):
-        return Line(
-            self.decode_line(line, strip=strip) if decode else line
-        )
+    def create_line(self, line, **kwargs):
+        """
+        Create a new FLEX Line object from the given raw line.
+
+        :param line: The line to turn into a FLEX Line object.
+        :keyword decode: If the line should be decoded from a byte sequence or not, default is True.
+        :keyword strip: Tf the line should be stripped of newlines, default is True.
+        :return: A new FLEX Line object based on the line parameter.
+        """
+        strip = kwargs.get("strip", True)
+        decode = kwargs.get("decode", True)
+        return Line(self.decode_line(line, strip=strip) if decode else line)
 
     def is_line_blacklisted(self, line):
         """
         Check to see if the given line is in the blacklist.
         The blacklist is checked for monitorcodes and messages.
+
         :param line: The line to check against the blacklist.
         :return: True if the line is blacklisted.
         """
@@ -153,6 +179,7 @@ class Reader:
         """
         Check to see if the given line is in the blacklist.
         The blacklist is checked for monitorcodes.
+
         :param line: The line to check against the blacklist.
         :return: True if the line is blacklisted.
         """
@@ -162,6 +189,7 @@ class Reader:
         """
         Check to see if the given line is in the blacklist.
         The blacklist is checked for messages.
+
         :param line: The line to check against the blacklist.
         :return: True if the line is blacklisted.
         """
@@ -171,6 +199,7 @@ class Reader:
     def load_config(self):
         """
         Load the config file as JSON.
+
         :return: The config file as JSON.
         """
         with open('config.json') as file:
