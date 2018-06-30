@@ -87,6 +87,15 @@ class AbstractReader:
         self.encoding = kwargs.get("encoding", "utf-8")
         self.connection = None
 
+    @abc.abstractmethod
+    def act(self, line):
+        """
+        Act on the given line.
+
+        :param line: The line to operate on.
+        :return: Up to the user.
+        """
+
     def attach(self, connection):
         """
         Attach the given connection to the reader, calls the setup method and sets the instance variables.
@@ -131,15 +140,6 @@ class AbstractReader:
                 self.act(line)
         finally:
             self.detach()
-
-    @abc.abstractmethod
-    def act(self, line):
-        """
-        Act on the given line.
-
-        :param line: The line to operate on.
-        :return: Up to the user.
-        """
 
     def decode_line(self, line, strip=True):
         """
