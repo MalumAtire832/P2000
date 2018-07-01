@@ -1,5 +1,5 @@
 import abc
-import json
+from p2000 import utils
 from subprocess import Popen, PIPE, run
 from sys import exc_info
 
@@ -82,8 +82,8 @@ class AbstractReader:
     """
 
     def __init__(self, **kwargs):
-        self.blacklist_messages = self.load_config()["rtlsdr"]["blacklist"]["messages"]
-        self.blacklist_monitorcodes = self.load_config()["rtlsdr"]["blacklist"]["monitorcodes"]
+        self.blacklist_messages = utils.load_config()["rtlsdr"]["blacklist"]["messages"]
+        self.blacklist_monitorcodes = utils.load_config()["rtlsdr"]["blacklist"]["monitorcodes"]
         self.encoding = kwargs.get("encoding", "utf-8")
         self.connection = None
 
@@ -200,13 +200,3 @@ class AbstractReader:
             return line.message in self.blacklist_messages
         else:
             return self.create_line(line).message in self.blacklist_messages
-
-    # noinspection PyMethodMayBeStatic
-    def load_config(self):
-        """
-        Load the config file as JSON.
-
-        :return: The config file as JSON.
-        """
-        with open('config.json') as file:
-            return json.load(file)

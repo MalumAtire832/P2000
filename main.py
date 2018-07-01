@@ -1,9 +1,8 @@
-import rtlsdr
-from tomzulu import Scraper, Region
-from pprint import pprint
+from p2000.rtlsdr import Connection, AbstractReader
+from p2000.tomzulu import Scraper, Region, Database
 
 
-class MyReader(rtlsdr.AbstractReader):
+class MyReader(AbstractReader):
 
     def act(self, raw):
         line = self.create_line(raw)
@@ -13,15 +12,18 @@ class MyReader(rtlsdr.AbstractReader):
             print(str(line))
 
 
-# scraper = Scraper(Region.FRIESLAND)
-# landing = scraper.get_landing_page()
-# links = scraper.get_discipline_links(landing)
-# units = scraper.get_units()
-#
+scraper = Scraper(Region.FRIESLAND)
+landing = scraper.get_landing_page()
+links = scraper.get_discipline_links(landing)
+units = scraper.get_units(links[0])
+
+writer = Database()
+writer.write_units(units)
+
 # for discipline in units:
 #     pprint("{0} Size = {1}".format(discipline[0].discipline, len(discipline)))
 
 
-connection = rtlsdr.Connection()
-reader = MyReader()
-reader.attach(connection)
+# connection = Connection()
+# reader = MyReader()
+# reader.attach(connection)

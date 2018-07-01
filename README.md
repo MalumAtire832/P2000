@@ -9,11 +9,11 @@ Build with Python 3.6.5
 This section features some small examples on how to use or extend these scripts.
 
 #### Custom Reader
-```Python
-import rtlsdr
+```python
+from p2000.rtlsdr import AbstractReader, Connection
 
 
-class MyReader(rtlsdr.AbstractReader):
+class MyReader(AbstractReader):
 
     def act(self, raw):
         line = self.create_line(raw)
@@ -23,14 +23,15 @@ class MyReader(rtlsdr.AbstractReader):
             print(str(line))
 
 
-connection = rtlsdr.Connection()
+connection = Connection()
 reader = MyReader()
 reader.attach(connection)
 ```
 
-#### Fetching Capcodes
-```Python
-from tomzulu import Scraper, Region
+#### Fetching Units
+```python
+from p2000.tomzulu import Scraper, Region
+
 
 scraper = Scraper(Region.FRIESLAND)
 landing = scraper.get_landing_page()
@@ -39,6 +40,21 @@ units = scraper.get_units()
 
 for discipline in units:
     print("{0} Size = {1}".format(discipline[0].discipline, len(discipline)))
+```
+
+#### Writing Units to the Database.
+```python
+from p2000.tomzulu import Scraper, Region, Database
+
+
+scraper = Scraper(Region.FRIESLAND)
+landing = scraper.get_landing_page()
+links = scraper.get_discipline_links(landing)
+units = scraper.get_units(links[0])
+
+writer = Database() # Open the Database.
+writer.write_unit(units[0]) # Write a single unit
+writer.write_units(units) # Write all the units
 ```
 
 ## Setup

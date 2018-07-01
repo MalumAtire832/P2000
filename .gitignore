@@ -158,3 +158,10 @@ fabric.properties
 # Editor-based Rest Client
 .idea/httpRequests
 
+
+
+
+
+# Custom Ignores.
+
+/resources/tomzulu.db

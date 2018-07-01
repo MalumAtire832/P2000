@@ -8,5 +8,10 @@
       "monitorcodes": []
     }
   },
-  "multimon": {}
+  "tomzulu": {
+    "database": {
+      "path": "./resources/tomzulu.db",
+      "refresh_on_start": true
+    }
+  }
 }

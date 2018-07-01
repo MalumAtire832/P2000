@@ -1,3 +1,6 @@
+import sqlite3
+from p2000 import utils
+from p2000.singleton import Singleton
 from requests import get
 from requests.exceptions import RequestException
 from contextlib import closing
@@ -26,14 +29,14 @@ class Unit:
 class Discipline(Enum):
     """
     Represents a discipline in the Dutch national service.
-    Each discipline has a dict with a numerical id and a list of keywords that can be
+    Each discipline has a dict with a string id and a list of keywords that can be
     matched against the titles of sidebar links in the Scraper.
     """
-    UNKNOWN =         {"id": 0, "keywords": []}
-    FIRE_DEPARTMENT = {"id": 1, "keywords": ["brandweer"]}
-    AMBULANCE =       {"id": 2, "keywords": ["ambulance", "ghor", "ovd-g"]}
-    POLICE =          {"id": 3, "keywords": ["politie", "copi", "sgbo", "persinfo", "persvoorlichter", "voa", "bhv"]}
-    KNRM =            {"id": 4, "keywords": ["knrm", "kwc"]}
+    UNKNOWN =         {"id": "00", "keywords": []}
+    FIRE_DEPARTMENT = {"id": "01", "keywords": ["brandweer"]}
+    AMBULANCE =       {"id": "02", "keywords": ["ambulance", "ghor", "ovd-g"]}
+    POLICE =          {"id": "03", "keywords": ["politie", "copi", "sgbo", "persinfo", "persvoorlichter", "voa", "bhv"]}
+    KNRM =            {"id": "04", "keywords": ["knrm", "kwc"]}
 
     @staticmethod
     def is_match(text, discipline):
@@ -228,3 +231,95 @@ class Scraper:
         return (resp.status_code == 200
                 and content_type is not None
                 and content_type.find('html') > -1)
+
+
+class Database(metaclass=Singleton):
+    """
+    This class is responsible for writing the units to and from a SQLite database.
+    The details of the database are in the config.json.
+    """
+
+    INSERT_STATEMENT = 'INSERT INTO units (capcode, region, town, function, discipline) VALUES (?, ?, ?, ?, ?)'
+
+    def __init__(self):
+        """
+        Created a new Singleton Database to  write and read from.
+        The database is initialized with the path given in `config.json["tomzulu"]["database"]["path"]`.
+        The tables are dropped each time the application is started by default, this can be changed by
+        setting `config.json["tomzulu"]["database"]["refresh_on_start"]` to `False`
+        """
+        refresh = utils.load_config()["tomzulu"]["database"]["refresh_on_start"]
+        db_path = utils.load_config()["tomzulu"]["database"]["path"]
+        self.connection = sqlite3.connect(db_path)
+        self.__create_units_table__(drop=refresh)
+
+    def __drop_units_table(self):
+        """
+        Drop the units table.
+        :return: Nothing
+        """
+        self.connection.execute("DROP TABLE IF EXISTS units;")
+        self.connection.commit()
+
+    def __create_units_table__(self, drop=False):
+        """
+        Create the units table.
+        :param drop: True if the table should be dropped before this operation, default is False.
+        :return: Nothing
+        """
+        if drop:
+            self.__drop_units_table()
+        self.connection.execute(
+            "CREATE TABLE units("
+                "id          INTEGER  PRIMARY KEY AUTOINCREMENT NOT NULL,"
+                "capcode     TEXT NOT NULL,"
+                "region      TEXT,"
+                "town      TEXT,"
+                "function    TEXT,"
+                "discipline  TEXT"
+            ");")
+        self.connection.commit()
+
+    def write_units(self, units):
+        """
+        Write multiple Unit objects to the database.
+        :param units: The units to write to the database.
+        :return: Nothing
+        :raises TypeError: Raised when any of the units is not a Unit object.
+        """
+        cursor = self.connection.cursor()
+        for unit in units:
+            if not isinstance(unit, Unit):
+                raise TypeError("Parameter unit is not of type tomzulu.Unit")
+            params = self.__unit_to_params__(unit)
+            cursor.execute(self.INSERT_STATEMENT, params)
+        self.connection.commit()
+
+    def write_unit(self, unit):
+        """
+        Write a single Unit object to the database.
+        :param unit: The unit to write to the database.
+        :return: Nothing
+        :raises TypeError: Raised when the unit is not a Unit object.
+        """
+        if not isinstance(unit, Unit):
+            raise TypeError("Parameter unit is not of type tomzulu.Unit")
+        params = self.__unit_to_params__(unit)
+        self.connection.execute(self.INSERT_STATEMENT, params)
+        self.connection.commit()
+
+    # noinspection PyMethodMayBeStatic
+    def __unit_to_params__(self, unit: Unit):
+        """
+        Creates a tuple from the given Unit object's values.
+        This tuple can be used as parameters for a Unit insert query.
+        :param unit: The unit to convert.
+        :return: A tuple of strings in the following format: (capcode, region[id], town, function, discipline[id])
+        """
+        return (
+            unit.capcode,
+            unit.region.value["id"],
+            unit.town,
+            unit.function,
+            unit.discipline.value["id"]
+        )
