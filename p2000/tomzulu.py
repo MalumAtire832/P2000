@@ -79,7 +79,7 @@ class Discipline(Enum):
         :return: A Discipline object if a match is found, Discipline.UNKNOWN if no match was found.
         """
         for discipline in Discipline:
-            if Discipline.value["id"] == val:
+            if discipline.value["id"] == val:
                 return discipline
         return Discipline.UNKNOWN
 
@@ -130,7 +130,7 @@ class Region(Enum):
         :return: A Region object if a match is found, Region.UNKNOWN if no match was found.
         """
         for region in Region:
-            if Region.value["id"] == val:
+            if region.value["id"] == val:
                 return region
         return Region.UNKNOWN
 
