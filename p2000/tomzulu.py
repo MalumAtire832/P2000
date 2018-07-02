@@ -70,6 +70,19 @@ class Discipline(Enum):
                 return discipline
         return Discipline.UNKNOWN
 
+    @staticmethod
+    def match_by_id(val):
+        """
+        Check to see what Discipline is matched with the given id.
+        This method checks every Discipline for it's id.
+        :param val: The id to verify.
+        :return: A Discipline object if a match is found, Discipline.UNKNOWN if no match was found.
+        """
+        for discipline in Discipline:
+            if Discipline.value["id"] == val:
+                return discipline
+        return Discipline.UNKNOWN
+
 
 class Region(Enum):
     # Todo - Maybe move the initial values to the config.json to make them easily editable.
@@ -107,6 +120,19 @@ class Region(Enum):
     LIMBURG_ZUID =         {'id': "24", 'url': "24-zuid-limburg1", 'name': "Zuid - Limburg"}
     FLEVOLAND =            {'id': "25", 'url': "25-flevoland", 'name': "Flevoland"}
     KWC_KNRM =             {'id': "26", 'url': "26-kwc-knrm", 'name': "KWC / KN"}
+
+    @staticmethod
+    def match_by_id(val):
+        """
+        Check to see what Region is matched with the given id.
+        This method checks every Region for it's id.
+        :param val: The id to verify.
+        :return: A Region object if a match is found, Region.UNKNOWN if no match was found.
+        """
+        for region in Region:
+            if Region.value["id"] == val:
+                return region
+        return Region.UNKNOWN
 
 
 # noinspection PyMethodMayBeStatic
@@ -323,3 +349,45 @@ class Database(metaclass=Singleton):
             unit.function,
             unit.discipline.value["id"]
         )
+
+    def find_units(self, capcode, limit=None):
+        """
+        Search the database for any units matching the given capcode.
+        :param capcode: The capcode to search the database for.
+        :param limit: The maximum amount of result to fetch, default is unlimited.
+        :return: A List of Unit objects, or an empty List if none were found.
+        """
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT * FROM units WHERE capcode =?", [capcode])
+        rows = cursor.fetchall() if limit is None else cursor.fetchmany(limit)
+        return [self.__row_to_unit__(row) for row in rows]
+
+    def find_unit(self, capcode):
+        """
+        Search the database for any units matching the given capcode.
+        Only one Unit is returned at all times, even if multiple are found, the first is returned.
+        :param capcode: The capcode to search the database for.
+        :return: A Unit object, or None if none were found.
+        """
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT * FROM units WHERE capcode =?", [capcode])
+        row = cursor.fetchone()
+        return self.__row_to_unit__(row)
+
+    # noinspection PyMethodMayBeStatic
+    def __row_to_unit__(self, row):
+        """
+        Convert a row(Tuple) from the database to a Unit object.
+        :param row: The row/Tuple to convert.
+        :return: A Unit object with the same values as the Tuple, Region and Disciplines are matched as wel.
+        """
+        if row is None:
+            return None
+        else:
+            return Unit(
+                capcode=row[1],
+                region=Region.match_by_id(row[2]),
+                town=row[3],
+                function=row[4],
+                discipline=Discipline.match_by_id(row[5]),
+            )

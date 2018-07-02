@@ -46,7 +46,7 @@ for discipline in units:
 ```python
 from p2000.tomzulu import Scraper, Region, Database
 
-
+# Fetching the raw data.
 scraper = Scraper(Region.FRIESLAND)
 landing = scraper.get_landing_page()
 links = scraper.get_discipline_links(landing)
@@ -55,6 +55,27 @@ units = scraper.get_units(links[0])
 writer = Database() # Open the Database.
 writer.write_unit(units[0]) # Write a single unit
 writer.write_units(units) # Write all the units
+```
+
+#### Searching the Database for Units.
+```python
+from p2000.tomzulu import Scraper, Region, Database
+
+# Fetching the raw data.
+scraper = Scraper(Region.FRIESLAND)
+landing = scraper.get_landing_page()
+links = scraper.get_discipline_links(landing)
+units = scraper.get_units(links[0])
+
+writer = Database() # Open the Database.
+writer.write_unit(units[0]) # Write a single unit
+writer.write_units(units) # Write all the units
+
+# Search for a single unit, even if multiple exist only one is returned.
+unit = writer.find_unit("0300050") 
+# Search for many units, a limit on the amount of results can be set with `.find_units("0300050", limit=10)`
+# Default limit is unlimited.
+units = writer.find_units("0300050")
 ```
 
 ## Setup
