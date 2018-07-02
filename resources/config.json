@@ -5,12 +5,14 @@
         "ALN TESTOPROEP BACK-UP SYSTEEM GMC BN (2)",
         "ALN TESTOPROEP HOOFDSSYSTEEM PGW BN (1)"
       ],
-      "monitorcodes": []
+      "monitorcodes": [
+
+      ]
     }
   },
-  "tomzulu": {
-    "database": {
-      "path": "./resources/tomzulu.db",
+  "database": {
+    "units": {
+      "path": "./resources/units.db",
       "refresh_on_start": false
     }
   }

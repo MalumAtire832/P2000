@@ -164,4 +164,4 @@ fabric.properties
 
 # Custom Ignores.
 
-/resources/tomzulu.db
+/resources/units.db

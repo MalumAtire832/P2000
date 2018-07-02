@@ -10,7 +10,8 @@ This section features some small examples on how to use or extend these scripts.
 
 #### Custom Reader
 ```python
-from p2000.rtlsdr import AbstractReader, Connection
+import p2000.rtlsdr as rtlsdr
+from p2000.rtlsdr import AbstractReader
 
 
 class MyReader(AbstractReader):
@@ -23,28 +24,38 @@ class MyReader(AbstractReader):
             print(str(line))
 
 
-connection = Connection()
+connection = rtlsdr.Connection()
 reader = MyReader()
 reader.attach(connection)
+
 ```
 
 #### Fetching Units
 ```python
-from p2000.tomzulu import Scraper, Region
+from p2000 import Region
+from p2000.storage.units import Scraper, helpers
 
 
+# Scraping for a single Region.
 scraper = Scraper(Region.FRIESLAND)
 landing = scraper.get_landing_page()
 links = scraper.get_discipline_links(landing)
 units = scraper.get_units()
 
 for discipline in units:
-    print("{0} Size = {1}".format(discipline[0].discipline, len(discipline)))
+    print("{0} Size = {1}".format(
+        discipline[0].discipline,
+        len(discipline)
+    ))
+
+# Fetch everything.
+helpers.fetch_all_units()
 ```
 
 #### Writing Units to the Database.
 ```python
-from p2000.tomzulu import Scraper, Region, Database
+from p2000 import Region
+from p2000.storage.units import Scraper, Connection
 
 # Fetching the raw data.
 scraper = Scraper(Region.FRIESLAND)
@@ -52,14 +63,19 @@ landing = scraper.get_landing_page()
 links = scraper.get_discipline_links(landing)
 units = scraper.get_units(links[0])
 
-writer = Database() # Open the Database.
-writer.write_unit(units[0]) # Write a single unit
-writer.write_units(units) # Write all the units
+# Open the Database.
+writer = Connection()
+# Write a single unit.
+writer.write_unit(units[0])
+# Or write all the units.
+writer.write_units(units)
+
 ```
 
 #### Searching the Database for Units.
 ```python
-from p2000.tomzulu import Scraper, Region, Database
+from p2000 import Region
+from p2000.storage.units import Scraper, Connection
 
 # Fetching the raw data.
 scraper = Scraper(Region.FRIESLAND)
@@ -67,15 +83,16 @@ landing = scraper.get_landing_page()
 links = scraper.get_discipline_links(landing)
 units = scraper.get_units(links[0])
 
-writer = Database() # Open the Database.
-writer.write_unit(units[0]) # Write a single unit
-writer.write_units(units) # Write all the units
+# Open the Database.
+writer = Connection()
+# Write all the units.
+writer.write_units(units)
 
 # Search for a single unit, even if multiple exist only one is returned.
-unit = writer.find_unit("0300050") 
-# Search for many units, a limit on the amount of results can be set with `.find_units("0300050", limit=10)`
-# Default limit is unlimited.
-units = writer.find_units("0300050")
+unit = writer.find_unit("0300050")
+# Search for multiple units, a default can be set as wel, default limit is unlimited.
+units = writer.find_units("0300050", limit=10)
+
 ```
 
 ## Setup

@@ -75,8 +75,8 @@ class AbstractReader:
     A Reader can act on a line received by any Connection that is attached to the Reader.
     The user should extend this class and create his/her own implementation of the act(line) method.
 
-    :ivar blacklist_messages: An array of messages contained in config.json -> rtlsdr -> blacklist -> messages.
-    :ivar blacklist_monitorcodes: An array of monitorcodes contained in config.json -> rtlsdr -> blacklist -> monitorcodes.
+    :ivar blacklist_messages: An array of messages contained in config.json
+    :ivar blacklist_monitorcodes: An array of monitorcodes contained in config.json
     :ivar encoding: The encoding for the received lines, default is UTF-8.
     :ivar connection: The connection to act on, set and unset with attach and detach respectively.
     """
