@@ -39,6 +39,10 @@ class Discipline(Enum):
     KNRM =            {"id": "04", "keywords": ["knrm", "kwc"]}
 
     @staticmethod
+    def all():
+        return [d for d in Discipline][1:-1]
+
+    @staticmethod
     def is_match(text, discipline):
         """
         Check to see if the given Discipline is a match for the given text.
@@ -120,6 +124,10 @@ class Region(Enum):
     LIMBURG_ZUID =         {'id': "24", 'url': "24-zuid-limburg1", 'name': "Zuid - Limburg"}
     FLEVOLAND =            {'id': "25", 'url': "25-flevoland", 'name': "Flevoland"}
     KWC_KNRM =             {'id': "26", 'url': "26-kwc-knrm", 'name': "KWC / KN"}
+
+    @staticmethod
+    def all():
+        return [r for r in Region][1:-1]
 
     @staticmethod
     def match_by_id(val):

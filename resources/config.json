@@ -11,7 +11,7 @@
   "tomzulu": {
     "database": {
       "path": "./resources/tomzulu.db",
-      "refresh_on_start": true
+      "refresh_on_start": false
     }
   }
 }
