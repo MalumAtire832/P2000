@@ -1,4 +1,4 @@
-from p2000.enums import Region, Discipline
+from p2000.enums import Region, Discipline  # p2000.enums, because just p2000 would create a circular dependency
 
 
 class Unit:
