@@ -1,8 +1,8 @@
 from enum import Enum
 
 
+# noinspection PyTypeChecker
 class Region(Enum):
-    # Todo - Maybe move the initial values to the config.json to make them easily editable.
     """
     This enum holds all the regions in the Netherlands covered by the P2000 system.
     Every Region has a dict that has a 2 digit "id" represented as a String, a "url" that should be
@@ -10,6 +10,16 @@ class Region(Enum):
     Every Region also has a "name", this name can be used to visually represent the region
     in an eventual application.
     """
+    # Todo - Maybe move the initial values to the config.json to make them easily editable.
+    __order__ = """
+                UNKNOWN GRONINGEN FRIESLAND DRENTHE IJSSELLAND TWENTE
+                GELDERLAND_NEO GELDERLAND_MIDDEN GELDERLAND_ZUID UTRECHT
+                NOORD_HOLLAND ZAANSTREEK_WATERLAND KENNERMERLAND AMSTERDAM_AMSTELLAND
+                GOOI_EN_VECHTSTREEK HAAGLANDEN HOLLANDS_MIDDEN ROTTERDAM_RIJNMOND
+                ZUID_HOLLAND ZEELAND BRABANT_MIDWEST BRABANT_NOORD BRABANT_ZUIDOOST
+                LIMBURG_NOORD LIMBURG_ZUID FLEVOLAND KWC_KNRM
+                """
+
     UNKNOWN =              {'id': "00", 'url': "unknown", 'name': "Unknown"}
     GRONINGEN =            {'id': "01", 'url': "01-groningen", 'name': "Groningen"}
     FRIESLAND =            {'id': "02", 'url': "02-friesland", 'name': "Friesland"}
@@ -40,7 +50,7 @@ class Region(Enum):
 
     @staticmethod
     def all():
-        return [r for r in Region][1:-1]
+        return [r for r in Region][1:]
 
     @staticmethod
     def match_by_id(val):
@@ -51,17 +61,21 @@ class Region(Enum):
         :return: A Region object if a match is found, Region.UNKNOWN if no match was found.
         """
         for region in Region:
-            if region.value["id"] == val:
+            if region.value["id"] == str(val):
                 return region
         return Region.UNKNOWN
 
 
+# noinspection PyTypeChecker
 class Discipline(Enum):
     """
     Represents a discipline in the Dutch national service.
     Each discipline has a dict with a string id and a list of keywords that can be
     matched against the titles of sidebar links in the Scraper.
     """
+    # Todo - Maybe move the initial values to the config.json to make them easily editable.
+    __order__ = 'UNKNOWN FIRE_DEPARTMENT AMBULANCE POLICE KNRM'
+
     UNKNOWN =         {"id": "00", "keywords": []}
     FIRE_DEPARTMENT = {"id": "01", "keywords": ["brandweer"]}
     AMBULANCE =       {"id": "02", "keywords": ["ambulance", "ghor", "ovd-g"]}
@@ -70,7 +84,7 @@ class Discipline(Enum):
 
     @staticmethod
     def all():
-        return [d for d in Discipline][1:-1]
+        return [d for d in Discipline][1:]
 
     @staticmethod
     def is_match(text, discipline):
