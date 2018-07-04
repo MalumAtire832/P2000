@@ -12,7 +12,7 @@
   },
   "database": {
     "units": {
-      "path": "./resources/units.db",
+      "path": "./resources/data/units",
       "refresh_on_start": false
     }
   }
