@@ -1,11 +1,12 @@
 import sqlite3
 
-from p2000 import utils
+from p2000 import utils, singleton
 from p2000.storage.units import helpers
-from p2000.objects import Unit, Singleton
+from p2000.objects import Unit
 
 
-class Connection(metaclass=Singleton):
+@singleton
+class Connection:
     """
     This class is responsible for writing the database to and from a SQLite database.
     The details of the database are in the config.json.
