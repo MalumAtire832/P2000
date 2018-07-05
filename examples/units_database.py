@@ -8,9 +8,10 @@ links = scraper.get_discipline_links(landing)
 units = scraper.get_units(links[0])
 
 # Open the Database.
-connection = Connection()
-# Write all the units.
+connection = Connection().establish()
+# Write a single unit.
+connection.write_unit(units[0])
+# Or write all the units.
 connection.write_units(units)
-
-# Search for multiple units, a default can be set as wel, default limit is unlimited.
+# Search for multiple units, a limit can be set as wel, default limit is unlimited.
 units = connection.find_units("0300050", limit=10)
