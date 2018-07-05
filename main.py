@@ -1,17 +1,16 @@
-import p2000.rtlsdr as rtlsdr
-from p2000.rtlsdr import AbstractReader
+from p2000 import Region
+from p2000.storage.units import Scraper, Connection
 
+# Fetching the raw data.
+scraper = Scraper(Region.FRIESLAND)
+landing = scraper.get_landing_page()
+links = scraper.get_discipline_links(landing)
+units = scraper.get_units(links[0])
 
-class MyReader(AbstractReader):
+# Open the Database.
+connection = Connection().establish()
+# Write all the units.
+connection.write_units(units)
 
-    def act(self, raw):
-        line = self.create_line(raw)
-        if self.is_line_blacklisted(line):
-            print("== LINE IS BLACKLISTED ==")
-        else:
-            print(str(line))
-
-
-connection = rtlsdr.Connection()
-reader = MyReader()
-reader.attach(connection)
+# Search for multiple units, a default can be set as wel, default limit is unlimited.
+units = connection.find_units("0300050", limit=10)
