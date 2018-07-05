@@ -1,4 +1,7 @@
-import abc
+import abc, sys
+
+from pymongo import MongoClient
+from pymongo.errors import ServerSelectionTimeoutError
 
 import p2000.utils
 
@@ -11,17 +14,26 @@ class AbstractConnection:
         self.client = None
         self.db = None
         self.collection = None
-        self.init()
 
-    @abc.abstractmethod
-    def init(self):
+    def establish(self, timeout=1):
         """
         Initialize the database.
-        :return: None
+        :return: The current instance.
+        :raises [IOError, ServerSelectionError]: Raised when the connection to the db cant be made.
         """
-        pass
+        try:
+            self.client = MongoClient(self.mongo_url(), serverSelectionTimeoutMS=timeout)
+            # Force Query to check connection, otherwise a bunch of weird formatting errors are raised.
+            self.client.server_info()
+            self.db = self.client[self.db_name()]
+            self.collection = self.db[self.collection_name()]
+            return self  # To make a `Connection().establish()` call possible.
+        except ServerSelectionTimeoutError as error:
+            url = self.mongo_url
+            message = "Could not connect to MongoDB @ '{0}'.\nOriginal error: '{1}'."
+            raise IOError(message.format(url, error.message))
 
-    @abc.abstractproperty
+    @abc.abstractmethod
     def mongo_url(self):
         """
         The path to the database.
@@ -29,7 +41,7 @@ class AbstractConnection:
         """
         pass
 
-    @abc.abstractproperty
+    @abc.abstractmethod
     def db_name(self):
         """
         The name of the database.
@@ -37,7 +49,7 @@ class AbstractConnection:
         """
         pass
 
-    @abc.abstractproperty
+    @abc.abstractmethod
     def collection_name(self):
         """
         The name of the database.

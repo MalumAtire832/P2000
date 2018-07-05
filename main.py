@@ -20,5 +20,5 @@ from p2000 import Unit
 from p2000.storage.units import Connection
 
 
-connection = Connection()
+connection = Connection().establish()
 connection.write_unit(Unit())

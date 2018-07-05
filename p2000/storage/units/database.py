@@ -1,5 +1,3 @@
-from pymongo import MongoClient
-
 from p2000 import Unit, Region, Discipline
 from p2000.storage.database import AbstractConnection
 
@@ -17,11 +15,6 @@ class Connection(AbstractConnection):
         and config.json["database"]["url"]
         """
         super(Connection, self).__init__()
-
-    def init(self):
-        self.client = MongoClient(self.mongo_url())
-        self.db = self.client[self.db_name()]
-        self.collection = self.db[self.collection_name()]
 
     def mongo_url(self):
         return self.config["database"]["url"]
