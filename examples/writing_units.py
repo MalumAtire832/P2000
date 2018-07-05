@@ -8,8 +8,8 @@ links = scraper.get_discipline_links(landing)
 units = scraper.get_units(links[0])
 
 # Open the Database.
-writer = Connection()
+connection = Connection()
 # Write a single unit.
-writer.write_unit(units[0])
+connection.write_unit(units[0])
 # Or write all the units.
-writer.write_units(units)
+connection.write_units(units)

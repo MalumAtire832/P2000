@@ -1,3 +1,5 @@
+from pymongo import MongoClient
+
 from p2000 import Unit, Region, Discipline
 from p2000.storage.database import AbstractConnection
 
@@ -11,18 +13,24 @@ class Connection(AbstractConnection):
     def __init__(self):
         """
         Created a new Singleton Database to  write and read from.
-        The database is initialized with the path given in `config.json["database"]["database"]["path"]`.
-        The tables are dropped each time the application is started by default, this can be changed by
-        setting `config.json["database"]["database"]["refresh_on_start"]` to `False`
+        The database is initialized with values from config.json["database"]["collections"]["units"]
+        and config.json["database"]["url"]
         """
         super(Connection, self).__init__()
 
     def init(self):
-        if self.config["database"]["units"]["refresh_on_start"]:
-            self.drop_db()
+        self.client = MongoClient(self.mongo_url())
+        self.db = self.client[self.db_name()]
+        self.collection = self.db[self.collection_name()]
 
-    def db_path(self):
-        return self.config["database"]["units"]["path"]
+    def mongo_url(self):
+        return self.config["database"]["url"]
+
+    def db_name(self):
+        return self.config["database"]["name"]
+
+    def collection_name(self):
+        return self.config["database"]["collections"]["units"]["name"]
 
     def object_to_row(self, obj):
         if not isinstance(obj, Unit):
@@ -57,8 +65,8 @@ class Connection(AbstractConnection):
         :return: Nothing
         :raises TypeError: Raised when any of the units is not a Unit object.
         """
-        for unit in units:
-            self.write_unit(unit)
+        rows = [self.object_to_row(u) for u in units]
+        self.collection.insert_many(rows)
 
     def write_unit(self, unit):
         """
@@ -67,7 +75,8 @@ class Connection(AbstractConnection):
         :return: Nothing
         :raises TypeError: Raised when the unit is not a Unit object.
         """
-        pass
+        row = self.object_to_row(unit)
+        self.collection.insert_one(row)
 
     def find_units(self, capcode, limit=None):
         """

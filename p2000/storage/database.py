@@ -5,19 +5,12 @@ import p2000.utils
 
 class AbstractConnection:
     __metaclass__ = abc.ABCMeta
-    _singleton_registry = {}
-
-    def __new__(cls, *args, **kw):
-        _instances = {}
-
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(AbstractConnection, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
 
     def __init__(self):
         super(AbstractConnection, self).__init__()
+        self.client = None
         self.db = None
+        self.collection = None
         self.init()
 
     @abc.abstractmethod
@@ -29,10 +22,26 @@ class AbstractConnection:
         pass
 
     @abc.abstractproperty
-    def db_path(self):
+    def mongo_url(self):
         """
         The path to the database.
         :return: Returns a string with the path to the database.
+        """
+        pass
+
+    @abc.abstractproperty
+    def db_name(self):
+        """
+        The name of the database.
+        :return: Returns a string with the name of the database.
+        """
+        pass
+
+    @abc.abstractproperty
+    def collection_name(self):
+        """
+        The name of the database.
+        :return: Returns a string with the name of the database.
         """
         pass
 
@@ -64,10 +73,10 @@ class AbstractConnection:
         """
         pass
 
-    def drop_db(self):
+    def drop_collection(self):
         """
         **WARNING, DATA CANNOT BE RECOVERED**
         Destroy/ Drop the current database.
-        :return: True
+        :return: None
         """
-        pass
+        self.client[self.collection_name].drop()

@@ -1,5 +1,5 @@
 from p2000 import Region
-from p2000.storage.units import Scraper, helpers
+from p2000.storage.units import Scraper
 
 
 # Scraping for a single Region.
@@ -13,6 +13,3 @@ for discipline in units:
         discipline[0].discipline,
         len(discipline)
     ))
-
-# Fetch everything.
-helpers.fetch_all_units()

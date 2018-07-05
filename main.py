@@ -16,12 +16,9 @@
 # reader = MyReader()
 # reader.attach(connection)
 
-from p2000 import Region
-from p2000.storage.units import Scraper, Connection as UConnection
+from p2000 import Unit
+from p2000.storage.units import Connection
 
 
-scraper = Scraper(Region.GRONINGEN)
-uc = UConnection()
-units = scraper.get_units(scraper.get_discipline_links()[0])
-for unit in units:
-    uc.write_unit(unit)
+connection = Connection()
+connection.write_unit(Unit())
