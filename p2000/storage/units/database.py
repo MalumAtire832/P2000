@@ -78,4 +78,6 @@ class Connection(AbstractConnection):
         :param limit: The maximum amount of result to fetch, default is unlimited.
         :return: A List of Unit objects, or an empty List if none were found.
         """
-        pass
+        params = {"capcode": capcode}
+        units = [self.row_to_object(row) for row in self.collection.find(params)]
+        return units[:limit]

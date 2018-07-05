@@ -21,4 +21,4 @@ from p2000.storage.units import Connection
 
 
 connection = Connection().establish()
-connection.write_unit(Unit())
+print connection.find_units("1")
