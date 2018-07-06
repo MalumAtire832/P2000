@@ -35,17 +35,13 @@ class Scrape(Base):
         bar = self.scrape_bar(len(regions))
         try:
             for region in regions:
-                scraper = Scrape.Scraper(region)
-                units = scraper.get_units()
-                for discipline in units:
-                    for unit in discipline:
-                        result.append(unit)
+                result.append(Scrape.Scraper(region).get_units())
                 bar.next()
         except IOError as error:
             raise IOError(error.message)
         finally:
             bar.finish()
-            return result
+            return [u for d in [d for r in result for d in r] for u in d]
 
     def write_all_units(self):
         units = self.fetch_all_units()
