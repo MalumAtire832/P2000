@@ -39,22 +39,13 @@ class Scraper:
         """
         return self.REGIONS_URL + self.region.value["url"]
 
-    def get_landing_page(self):
-        """
-        Fetch the landing page for the current instance.
-        The `get_region_url()` method is used in combination with `get_page()` to fetch it.
-        :return: The html of the landing page as a String.
-        """
-        return self.get_page(self.get_region_url())
-
-    def get_discipline_links(self, landing=None):
+    def __get_discipline_links__(self):
         """
         Fetch the sidebar links to various disciplines from the given landing page.
         :param landing: The html of the landing page, if no page is given it is fetched using `get_landing_page()`
         :return: A list with discipline link dicts, each with a discipline and a url.
         """
-        if landing is None:
-            landing = self.get_landing_page()
+        landing = self.get_page(self.get_region_url())
         html = BeautifulSoup(landing, 'html.parser')
         items = html.find_all("a", {"class": "jw-section-menu-list-item"})
         return [self.__create_dp_link__(item) for item in items]
@@ -82,18 +73,19 @@ class Scraper:
         """
         return self.BASE_URL + discipline_link["url"]
 
-    def get_units(self, discipline_link=None):
+    def get_units(self, discipline=None):
         """
         Fetch all the database from the given discipline page.
         See `__get_units__` for detailed info.
         All disciplines are fetched if no discipline_link is given.
-        :param discipline_link: The discipline link dict to fetch the database from.
+        :param discipline: The discipline to fetch the units for, default is all disciplines.
         :return: A list of Unit objects, or a list of lists with Unit objects if no link is given.
         """
-        if discipline_link is None:
-            return [self.__get_units__(d) for d in self.get_discipline_links()]
+        links = self.__get_discipline_links__()
+        if discipline is None:
+            return [u for u in (self.__get_units__(l) for l in links)]
         else:
-            return self.__get_units__(discipline_link)
+            return [self.__get_units__(l) if l["discipline"] == discipline else None for l in links][0]
 
     def __get_units__(self, discipline_link):
         """
