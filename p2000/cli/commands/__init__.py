@@ -1,1 +1,0 @@
-from scrape import Scrape
