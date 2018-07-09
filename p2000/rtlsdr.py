@@ -1,7 +1,9 @@
 import abc
+
+from requests import ConnectionError
+
 from p2000 import utils
-from subprocess import Popen, PIPE, run
-from sys import exc_info
+from subprocess import Popen, PIPE, call
 
 
 class Line:
@@ -66,7 +68,7 @@ class Connection:
         Kill the connection with COMMAND_KILL.
         :return: Nothing
         """
-        run(self.COMMAND_KILL)
+        call(self.COMMAND_KILL)
 
 
 class AbstractReader:
@@ -110,7 +112,7 @@ class AbstractReader:
         elif self.connection.stdout is None:
             self.__setup_connection__(connection)
         else:
-            raise ConnectionError("Connection is already active.").with_traceback(exc_info()[2])
+            raise ConnectionError("Connection is already active.")
 
     def detach(self):
         """
