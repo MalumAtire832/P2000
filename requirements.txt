@@ -1,5 +1,4 @@
 bs4
-docopt==0.6.2
 enum34
 progress
 pymongo
